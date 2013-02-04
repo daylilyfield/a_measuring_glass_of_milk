@@ -1,0 +1,34 @@
+{
+   "name": "A Measuring Glass of Milk",
+   "manifest_version": 2,
+   "version": "0.1.0",
+   "background": {
+       "js": "js/background.js"
+   },
+   "content_scripts": [{
+      "css": [
+          "css/mgm.css"
+      ],
+      "js": [
+          "js/inject.js"
+      ],
+      "matches": [
+          "http://www.rememberthemilk.com/*",
+          "https://www.rememberthemilk.com/*"
+      ]
+   }],
+   "permissions": [
+       "http://www.rememberthemilk.com/*",
+       "https://www.rememberthemilk.com/*",
+       "tabs"
+    ],
+
+    "web_accessible_resources": [
+        "js/mgm.js",
+        "js/namespace.js",
+        "js/actual_duration_model.js",
+        "js/actual_duration_view.js",
+        "image/control_play.png",
+        "image/control_stop.png"
+    ]
+}
