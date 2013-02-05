@@ -1,4 +1,4 @@
-(function(mgm) {
+(function(global, mgm) {
 
     var $ = function() {return document.getElementById(arguments[0]);};
 
@@ -8,7 +8,7 @@
     var ACTION_NODE_ID = 'detailsactualduration_action';
     var ACTION_ICON_NODE_ID = 'detailsactualduration_action_icon';
 
-    var ICON_PLAY = // {{{
+    var ICON_START = // {{{
             'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAf' +
             'SC3RAAAABGdBTUEAAK/INwWK6QAAAAlwSFlzAAAO' +
             'wwAADsMBx2+oZAAAABp0RVh0U29mdHdhcmUAUGFp' +
@@ -81,7 +81,7 @@
                   'title="' + title + '">' +
                    '<img id="' + ACTION_ICON_NODE_ID + '"' +
                         'class="field_img" ' +
-                        'src="data:image/png;base64,' + ICON_PLAY + '"' +
+                        'src="data:image/png;base64,' + ICON_START + '"' +
                         'alt="' + title + '" />' +
                '</a>' +
             '</span>';
@@ -116,10 +116,9 @@
         }
     };
 
-    mgm.DetailsActualDurationModel.prototype._stopRecording = function(taskId) {
+    mgm.DetailsActualDurationView.prototype._stopRecording = function(taskId) {
         if (confirm('タスク計測を終了しますか？')) {
-            $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_PLAY;
-            $(VALUE_NODE_ID).innerHTML = '0 時間 0 分';
+            $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
             this._model.stopRecording(taskId);
         }
     };
@@ -152,12 +151,17 @@
         var ids = list.getSelected(),
             length = ids.length,
             duration = 0;
-        for (var i = 0; i < length; i++) {
-            if (!this._model.isRecording(ids[i])) {
-                duration += this._model.getActualDuration(ids[i]);
+        if (length == 1 && this._model.isRecording(ids[0])) {
+            $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
+            $(VALUE_NODE_ID).innerHTML = '計測中...';
+        } else {
+            for (var i = 0; i < length; i++) {
+                if (!this._model.isRecording(ids[i])) {
+                    duration += this._model.getActualDuration(ids[i]);
+                }
             }
+            $(VALUE_NODE_ID).innerHTML = this.formatDuration(duration);
         }
-        $(VALUE_NODE_ID).innerHTML = this.formatDuration(duration);
     };
 
     mgm.DetailsActualDurationView.prototype.formatDuration = function(duration) {
@@ -166,4 +170,4 @@
         return Math.floor(hour) + ' 時間 ' +  Math.floor(minutes) + ' 分';
     };
 
-}(mgm));
+}(this, mgm));

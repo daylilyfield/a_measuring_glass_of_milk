@@ -1,11 +1,11 @@
-(function(global, initialize) {
+(function(global, mgm, initialize) {
 
     if (!messageBus || !stateMgr || !noteMgr) {
-        setTimeout(arguments.callee.bind(global, global, initialize), 1000);
+        setTimeout(arguments.callee.bind(global, global, mgm, initialize), 1000);
     } else {
         initialize(mgm);
     }
-}(this, function(mgm) {
+}(this, mgm, function(mgm) {
     
     var model = new mgm.DetailsActualDurationModel();
     var view = new mgm.DetailsActualDurationView(model);

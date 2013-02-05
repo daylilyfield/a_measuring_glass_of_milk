@@ -9,7 +9,7 @@
 
     mgm.DetailsActualDurationModel.prototype.getActualDuration = function(taskId) {
         if (taskId in this._tasksInRecording) {
-            return -1; // now recording
+            return -1;
         }
         if (taskId in this._tasksActualDurationCache) {
             return this._tasksActualDurationCache[taskId];
@@ -22,7 +22,12 @@
                 return this._tasksActualDurationCache[taskId] = 0;
             } else {
                 var duration = this._calculateActualDuration(note);
-                return this._tasksActualDurationCache[taskId] = duration;
+                if (!~duration) {
+                    this._tasksInRecording[taskId] = true;
+                    return duration;
+                } else {
+                    return this._tasksActualDurationCache[taskId] = duration;
+                }
             }
         } else {
             return this._tasksActualDurationCache[taskId] = 0;
@@ -50,6 +55,7 @@
     };
 
     mgm.DetailsActualDurationModel.prototype._calculateActualDuration = function(note) {
+        if (!note) return 0;
         var durations = note.content.split('\n'),
             length = durations.length,
             actual = 0;
@@ -61,8 +67,7 @@
                 if (!isNaN(from) && !isNaN(to)) {
                     actual += to.getTime() - from.getTime();
                 } else if (!isNaN(from) && isNaN(to)) {
-                    console.log('invalid mgm state. encounted unexpected recording task: ' + durations[i]);
-                    return 0;
+                    return -1;
                 }
             } else {
                 console.log('invalid mgm note format:' + durations[i]);
@@ -75,7 +80,7 @@
     mgm.DetailsActualDurationModel.prototype.startRecording = function(taskId) {
         if (!this.isRecording(taskId)) {
             this._tasksInRecording[taskId] = true;
-            var current = new Date;
+            var current = new Date();
             var notes = this._getNotesByTaskId(taskId);
             var mgmNote = this._findMgmNote(notes);
             var content = (mgmNote ? mgmNote.content + '\n' : '') + current.toISOString() + ',';
@@ -85,11 +90,10 @@
 
     mgm.DetailsActualDurationModel.prototype.stopRecording = function(taskId) {
         if (this.isRecording(taskId)) {
-            var current = new Date;
+            var current = new Date();
             var notes = this._getNotesByTaskId(taskId);
             var mgmNote = this._findMgmNote(notes);
-            // if mgm note is absent ... what should i do?
-            var content = (mgmNote ? mgmNote.content + '\n' : '') + current.toISOString();
+            var content = mgmNote.content + current.toISOString();
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);
             delete this._tasksInRecording[taskId];
         }
@@ -97,12 +101,10 @@
 
     mgm.DetailsActualDurationModel.prototype._updateMgmNote = function(taskId, content, noteId) {
         var method = 'notes.add';
-        var hash = hex_sha1(Math.random() * 10000 + content);
         var parameter = {
             task: control.taskSeriesMap([taskId]), 
             title: MGM_NOTE_TITLE,
-            content: content,
-            //hash: hash
+            content: content
         };
 
         if (noteId) {
@@ -113,7 +115,16 @@
     };
 
     mgm.DetailsActualDurationModel.prototype.isRecording = function(taskId) {
-        return taskId in this._tasksInRecording;
+        var nowInRecording = taskId in this._tasksInRecording;
+        if (!nowInRecording) {
+            var notes = this._getNotesByTaskId(taskId);
+            var mgmNote = this._findMgmNote(notes);
+            var duration = this._calculateActualDuration(mgmNote);
+            if (!~duration) {
+                nowInRecording = this._tasksInRecording[taskId] = true;
+            }
+        }
+        return nowInRecording;
     };
 
 }(mgm));
