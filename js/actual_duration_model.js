@@ -35,6 +35,7 @@
     };
 
     mgm.DetailsActualDurationModel.prototype._getNotesByTaskId = function(taskId) {
+        if (!noteMgr.index) return [];
         var seriesId = stateMgr.tasks[taskId].series_id;
         var noteIds = noteMgr.index[seriesId];
         return !noteIds ? [] : noteIds.map(function(value) {
@@ -70,7 +71,6 @@
                     return -1;
                 }
             } else {
-                console.log('invalid mgm note format:' + durations[i]);
                 return 0;
             }
         }
@@ -80,21 +80,28 @@
     mgm.DetailsActualDurationModel.prototype.startRecording = function(taskId) {
         if (!this.isRecording(taskId)) {
             this._tasksInRecording[taskId] = true;
-            var current = new Date();
-            var notes = this._getNotesByTaskId(taskId);
-            var mgmNote = this._findMgmNote(notes);
-            var content = (mgmNote ? mgmNote.content + '\n' : '') + current.toISOString() + ',';
+            var current = new Date(),
+                notes = this._getNotesByTaskId(taskId),
+                mgmNote = this._findMgmNote(notes),
+                content = (mgmNote ? mgmNote.content + '\n' : '') + current.toISOString() + ',';
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);
         }
     };
 
     mgm.DetailsActualDurationModel.prototype.stopRecording = function(taskId) {
         if (this.isRecording(taskId)) {
-            var current = new Date();
-            var notes = this._getNotesByTaskId(taskId);
-            var mgmNote = this._findMgmNote(notes);
-            var content = mgmNote.content + current.toISOString();
+            var current = new Date(),
+                notes = this._getNotesByTaskId(taskId),
+                mgmNote = this._findMgmNote(notes),
+                content = mgmNote.content + current.toISOString(),
+                duration = this._calculateActualDuration({content: content});
+            if (duration > 0 && duration < 60 * 1000) {
+                var lines = content.split('\n'),
+                    length = lines.length;
+                content = length == 1 ? '' : lines.slice(0, length - 1).join('\n');
+            }
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);
+            delete this._tasksActualDurationCache[taskId];
             delete this._tasksInRecording[taskId];
         }
     };
@@ -110,6 +117,9 @@
         if (noteId) {
             method = 'notes.edit';
             parameter.note = noteId;
+        } else {
+            var hash = hex_sha1(Math.random() * 10000 + content);
+            parameter.hash = hash;
         }
         transMgr.request(method, utility.encodeJavaScript(parameter));
     };
@@ -117,9 +127,9 @@
     mgm.DetailsActualDurationModel.prototype.isRecording = function(taskId) {
         var nowInRecording = taskId in this._tasksInRecording;
         if (!nowInRecording) {
-            var notes = this._getNotesByTaskId(taskId);
-            var mgmNote = this._findMgmNote(notes);
-            var duration = this._calculateActualDuration(mgmNote);
+            var notes = this._getNotesByTaskId(taskId),
+                mgmNote = this._findMgmNote(notes),
+                duration = this._calculateActualDuration(mgmNote);
             if (!~duration) {
                 nowInRecording = this._tasksInRecording[taskId] = true;
             }

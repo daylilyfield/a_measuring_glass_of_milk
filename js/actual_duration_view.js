@@ -64,7 +64,7 @@
     mgm.DetailsActualDurationView.prototype._createElements = function() {
         var title = '時間を計測する (m)',
             label = '計測時間',
-            none = '0 時間 0 分',
+            none = 'なし',
             container = document.createElement('div');
 
         container.id = CONTAINER_NODE_ID;
@@ -109,18 +109,18 @@
     };
 
     mgm.DetailsActualDurationView.prototype._startRecording = function(taskId) {
-        if (confirm('タスク計測を開始しますか？')) {
-            $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
-            $(VALUE_NODE_ID).innerHTML = '計測中...';
-            this._model.startRecording(taskId);
-        }
+        $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
+        $(VALUE_NODE_ID).innerHTML = '計測中...';
+        this._model.startRecording(taskId);
+        var name = stateMgr.tasks[taskId].name;
+        statusBox.setText('タスク "' + name + '" を開始します', false, true);
     };
 
     mgm.DetailsActualDurationView.prototype._stopRecording = function(taskId) {
-        if (confirm('タスク計測を終了しますか？')) {
-            $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
-            this._model.stopRecording(taskId);
-        }
+        $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
+        this._model.stopRecording(taskId);
+        var name = stateMgr.tasks[taskId].name;
+        statusBox.setText('タスク "' + name + '" を終了します', false, true);
     };
 
     mgm.DetailsActualDurationView.prototype._subscribeBroadcastEvent = function() {
@@ -165,6 +165,7 @@
     };
 
     mgm.DetailsActualDurationView.prototype.formatDuration = function(duration) {
+        if (duration === 0) return 'なし';
         var hour = duration / 1000 / 60 / 60;
         var minutes = (hour - Math.floor(hour)) * 60;
         return Math.floor(hour) + ' 時間 ' +  Math.floor(minutes) + ' 分';
