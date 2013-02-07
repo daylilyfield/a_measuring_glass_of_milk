@@ -80,29 +80,30 @@
     mgm.DetailsActualDurationModel.prototype.startRecording = function(taskId) {
         if (!this.isRecording(taskId)) {
             this._tasksInRecording[taskId] = true;
-            var current = new Date(),
+            var now = new Date(),
                 notes = this._getNotesByTaskId(taskId),
                 mgmNote = this._findMgmNote(notes),
-                content = (mgmNote ? mgmNote.content + '\n' : '') + current.toISOString() + ',';
+                content = (mgmNote ? mgmNote.content + '\n' : '') + now.toISOString() + ',';
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);
         }
     };
 
     mgm.DetailsActualDurationModel.prototype.stopRecording = function(taskId) {
         if (this.isRecording(taskId)) {
-            var current = new Date(),
+            var now = new Date(),
                 notes = this._getNotesByTaskId(taskId),
                 mgmNote = this._findMgmNote(notes),
-                content = mgmNote.content + current.toISOString(),
-                duration = this._calculateActualDuration({content: content});
+                content = mgmNote.content + now.toISOString(),
+                recent = content.split('\n').pop(),
+                duration = this._calculateActualDuration({content: recent});
             if (duration > 0 && duration < 60 * 1000) {
                 var lines = content.split('\n'),
                     length = lines.length;
                 content = length == 1 ? '' : lines.slice(0, length - 1).join('\n');
             }
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);
-            delete this._tasksActualDurationCache[taskId];
             delete this._tasksInRecording[taskId];
+            return this._tasksActualDurationCache[taskId] = this._calculateActualDuration({content: content});
         }
     };
 

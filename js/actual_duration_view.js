@@ -113,27 +113,43 @@
         $(VALUE_NODE_ID).innerHTML = '計測中...';
         this._model.startRecording(taskId);
         var name = stateMgr.tasks[taskId].name;
-        statusBox.setText('タスク "' + name + '" を開始します', false, true);
+        statusBox.setText('タスク "' + name + '" を開始しました', false, true);
     };
 
     mgm.DetailsActualDurationView.prototype._stopRecording = function(taskId) {
         $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
-        this._model.stopRecording(taskId);
+        var duration = this._model.stopRecording(taskId);
+        $(VALUE_NODE_ID).innerHTML = this.formatDuration(duration);
         var name = stateMgr.tasks[taskId].name;
-        statusBox.setText('タスク "' + name + '" を終了します', false, true);
+        statusBox.setText('タスク "' + name + '" を終了しました', false, true);
     };
 
     mgm.DetailsActualDurationView.prototype._subscribeBroadcastEvent = function() {
-        messageBus.subscribe(this._onTaskListHover.bind(this), 'rtm.list.tasks.hoverOn');
-        messageBus.subscribe(this._onTaskListBlur.bind(this), 'rtm.list.tasks.hoverOff');
-        messageBus.subscribe(this._onListSelectionFinished.bind(this), 'rtm.list.tasks.selectFinished');
+        messageBus.subscribe(this._onActiveTaskListHover.bind(this), 'rtm.list.tasks.hoverOn');
+        messageBus.subscribe(this._onActiveTaskListBlur.bind(this), 'rtm.list.tasks.hoverOff');
+        messageBus.subscribe(this._onActiveListSelectionFinished.bind(this), 'rtm.list.tasks.selectFinished');
+        messageBus.subscribe(this._onCompleteTaskListHover.bind(this), 'rtm.list.taskscompleted.hoverOn');
+        messageBus.subscribe(this._onCompleteTaskListBlur.bind(this), 'rtm.list.taskscompleted.hoverOff');
+        messageBus.subscribe(this._onCompleteListSelectionFinished.bind(this), 'rtm.list.taskscompleted.selectFinished');
     };
 
-    mgm.DetailsActualDurationView.prototype._onListSelectionFinished = function(list) {
-        this._showSelectedTaskDuration(list);
-    };
+    function onActive(f) {
+        return function() {
+            $(ACTION_ICON_NODE_ID).style.display = 'inline';
+            $(ACTION_NODE_ID).title = '';
+            f.apply(this, arguments);
+        };
+    }
 
-    mgm.DetailsActualDurationView.prototype._onTaskListHover = function(list, id) {
+    function onComplete(f) {
+        return function() {
+            $(ACTION_ICON_NODE_ID).style.display = 'none';
+            $(ACTION_NODE_ID).title = '';
+            f.apply(this, arguments);
+        };
+    }
+
+    function taskListHover(list, id) {
         if (this._model.isRecording(id)) {
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
             $(VALUE_NODE_ID).innerHTML = '計測中...';
@@ -141,11 +157,27 @@
             var duration = this._model.getActualDuration(id);
             $(VALUE_NODE_ID).innerHTML = this.formatDuration(duration);
         }
-    };
+    }
 
-    mgm.DetailsActualDurationView.prototype._onTaskListBlur = function(list) {
+    function taskListBlur(list) {
         this._showSelectedTaskDuration(list);
-    };
+    }
+
+    function listSelectionFinished(list) {
+        this._showSelectedTaskDuration(list);
+    }
+
+    mgm.DetailsActualDurationView.prototype._onActiveTaskListHover = onActive(taskListHover);
+
+    mgm.DetailsActualDurationView.prototype._onActiveTaskListBlur = onActive(taskListBlur);
+
+    mgm.DetailsActualDurationView.prototype._onActiveListSelectionFinished = onActive(listSelectionFinished);
+
+    mgm.DetailsActualDurationView.prototype._onCompleteTaskListHover = onComplete(taskListHover);
+
+    mgm.DetailsActualDurationView.prototype._onCompleteTaskListBlur = onComplete(taskListBlur);
+
+    mgm.DetailsActualDurationView.prototype._onCompleteListSelectionFinished = onComplete(listSelectionFinished);
 
     mgm.DetailsActualDurationView.prototype._showSelectedTaskDuration = function(list) {
         var ids = list.getSelected(),
