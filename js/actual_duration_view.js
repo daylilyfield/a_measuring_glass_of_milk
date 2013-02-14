@@ -212,8 +212,8 @@
             duration = 0;
         if (length == 1 && this._model.isRecording(ids[0])) {
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
-            var startTime = this._model.getStartTime(taskId);
-            var delta = Date.now - startTime;
+            var startTime = this._model.getStartTime(ids[0]);
+            var delta = Date.now() - startTime;
             $(VALUE_NODE_ID).innerHTML = '計測中...(' + this.formatDuration(delta) + '経過)';
         } else {
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
@@ -232,7 +232,7 @@
             fHour = Math.floor(hour),
             minutes = (hour - fHour) * 60,
             fMinutes = Math.floor(minutes);
-        return (fHour > 0 ? fHour + '時間' : '') + (fMinutes > 0 ? fMinutes + '分' : '');
+        return (fHour > 0 ? fHour + '時間' : '') + fMinutes + '分';
     };
 
 }(this, mgm));

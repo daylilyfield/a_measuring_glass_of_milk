@@ -123,6 +123,7 @@
                 mgmNote = this._findMgmNote(notes),
                 content = (mgmNote ? mgmNote.content + '\n' : '') + now.toISOString() + ',';
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);
+            this._tasksActualDurations[taskId] = this._readMgmNoteContent(content);
         }
     };
 
@@ -133,14 +134,18 @@
                 mgmNote = this._findMgmNote(notes),
                 content = mgmNote.content + now.toISOString(),
                 recent = content.split('\n').pop(),
-                duration = this._calculateActualDuration({content: recent});
+                data = this._readMgmNoteContent(content).slice(-1)[0],
+                from = data && data.from,
+                to = data && data.to,
+                duration = to.getTime() - from.getTime();
             if (duration > 0 && duration < 60 * 1000) {
                 var lines = content.split('\n'),
                     length = lines.length;
                 content = length == 1 ? '' : lines.slice(0, length - 1).join('\n');
             }
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);
-            return this._tasksActualDurations[taskId] = this._readMgmNoteContent(content);
+            this._tasksActualDurations[taskId] = this._readMgmNoteContent(content);
+            return this.getActualDuration(taskId);
         }
     };
 
