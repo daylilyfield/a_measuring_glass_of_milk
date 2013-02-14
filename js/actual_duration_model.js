@@ -27,39 +27,57 @@
     var MGM_NOTE_TITLE = 'Measuring Glass';
 
     mgm.DetailsActualDurationModel = function() {
-        this._tasksInRecording = {};
-        this._tasksActualDurationCache = {};
+        this._tasksActualDurations = {}; // [{from: ..., to: ...}, {from: ..., to: ...}]
+    };
+
+    mgm.DetailsActualDurationModel.prototype.isRecording = function(taskId) {
+        var data = this._readMgmNoteIfNeeded(taskId);
+        return data && data.length > 0 && !data.slice(-1)[0].to;
     };
 
     mgm.DetailsActualDurationModel.prototype.getActualDuration = function(taskId) {
-        if (taskId in this._tasksInRecording) {
-            return task._tasksInRecording[taskId];
+        var data = this._readMgmNoteIfNeeded(taskId),
+            length = data.length,
+            actual = 0;
+        for (var i = 0; i < length; i++) {
+            var duration = data[i];
+            if (duration.from && duration.to) {
+                actual += duration.to.getTime() - duration.from.getTime();
+            }
         }
-        if (taskId in this._tasksActualDurationCache) {
-            return this._tasksActualDurationCache[taskId];
-        }
+        return actual;
+    };
 
+    mgm.DetailsActualDurationModel.prototype.getStartTime = function(taskId) {
+        if (this.isRecording(taskId)) {
+            return this._tasksActualDurations[taskId].slice(-1)[0].from.getTime();
+        } else {
+            throw new Error('task is not started');
+        }
+    };
+
+    mgm.DetailsActualDurationModel.prototype._readMgmNoteIfNeeded = function(taskId) {
+        if (taskId in this._tasksActualDurations) {
+            return this._tasksActualDurations[taskId];
+        }
         var notes = this._getNotesByTaskId(taskId);
         if (notes && notes.length > 0) {
             var note = this._findMgmNote(notes);
             if (!note) {
-                return this._tasksActualDurationCache[taskId] = 0;
+                return this._tasksActualDurations[taskId] = [];
             } else {
-                var duration = this._calculateActualDuration(note);
-                if (!~duration) {
-                    this._tasksInRecording[taskId] = true;
-                    return duration;
-                } else {
-                    return this._tasksActualDurationCache[taskId] = duration;
-                }
+                var content = this._readMgmNoteContent(note.content);
+                return this._tasksActualDurations[taskId] = content;
             }
         } else {
-            return this._tasksActualDurationCache[taskId] = 0;
+            return this._tasksActualDurations[taskId] = [];
         }
     };
 
     mgm.DetailsActualDurationModel.prototype._getNotesByTaskId = function(taskId) {
-        if (!noteMgr.index) return [];
+        if (!noteMgr.index) {
+            noteMgr.prepareIndex();
+        }
         var seriesId = stateMgr.tasks[taskId].series_id;
         var noteIds = noteMgr.index[seriesId];
         return !noteIds ? [] : noteIds.map(function(value) {
@@ -79,31 +97,27 @@
         return note;
     };
 
-    mgm.DetailsActualDurationModel.prototype._calculateActualDuration = function(note) {
-        if (!note) return 0;
-        var durations = note.content.split('\n'),
+    mgm.DetailsActualDurationModel.prototype._readMgmNoteContent = function(content) {
+        var durations = content.split('\n'),
             length = durations.length,
-            actual = 0;
+            data = [];
         for (var i = 0; i < length; i++) {
             var ft = durations[i].split(',');
             if (ft.length == 2) {
                 var from = new Date(ft[0]),
                     to = new Date(ft[1]);
                 if (!isNaN(from) && !isNaN(to)) {
-                    actual += to.getTime() - from.getTime();
+                    data.push({from: from, to: to});
                 } else if (!isNaN(from) && isNaN(to)) {
-                    return -1;
+                    data.push({from: from});
                 }
-            } else {
-                return 0;
             }
         }
-        return actual;
+        return data;
     };
 
     mgm.DetailsActualDurationModel.prototype.startRecording = function(taskId) {
         if (!this.isRecording(taskId)) {
-            this._tasksInRecording[taskId] = true;
             var now = new Date(),
                 notes = this._getNotesByTaskId(taskId),
                 mgmNote = this._findMgmNote(notes),
@@ -126,8 +140,7 @@
                 content = length == 1 ? '' : lines.slice(0, length - 1).join('\n');
             }
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);
-            delete this._tasksInRecording[taskId];
-            return this._tasksActualDurationCache[taskId] = this._calculateActualDuration({content: content});
+            return this._tasksActualDurations[taskId] = this._readMgmNoteContent(content);
         }
     };
 
@@ -147,19 +160,6 @@
             parameter.hash = hash;
         }
         transMgr.request(method, utility.encodeJavaScript(parameter));
-    };
-
-    mgm.DetailsActualDurationModel.prototype.isRecording = function(taskId) {
-        var nowInRecording = taskId in this._tasksInRecording;
-        if (!nowInRecording) {
-            var notes = this._getNotesByTaskId(taskId),
-                mgmNote = this._findMgmNote(notes),
-                duration = this._calculateActualDuration(mgmNote);
-            if (!~duration) {
-                nowInRecording = this._tasksInRecording[taskId] = true;
-            }
-        }
-        return nowInRecording;
     };
 
 }(mgm));

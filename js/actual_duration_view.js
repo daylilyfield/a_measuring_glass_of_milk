@@ -134,7 +134,7 @@
 
     mgm.DetailsActualDurationView.prototype._startRecording = function(taskId) {
         $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
-        $(VALUE_NODE_ID).innerHTML = '計測中...';
+        $(VALUE_NODE_ID).innerHTML = '計測中...(0分経過)';
         this._model.startRecording(taskId);
         var name = stateMgr.tasks[taskId].name;
         statusBox.setText('タスク "' + name + '" を開始しました', false, true);
@@ -173,12 +173,15 @@
         };
     }
 
-    function taskListHover(list, id) {
-        if (this._model.isRecording(id)) {
+    function taskListHover(list, taskId) {
+        if (this._model.isRecording(taskId)) {
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
-            $(VALUE_NODE_ID).innerHTML = '計測中...';
+            var startTime = this._model.getStartTime(taskId);
+            var delta = Date.now() - startTime;
+            $(VALUE_NODE_ID).innerHTML = '計測中...(' + this.formatDuration(delta) + '経過)';
         } else {
-            var duration = this._model.getActualDuration(id);
+            $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
+            var duration = this._model.getActualDuration(taskId);
             $(VALUE_NODE_ID).innerHTML = this.formatDuration(duration);
         }
     }
@@ -209,8 +212,11 @@
             duration = 0;
         if (length == 1 && this._model.isRecording(ids[0])) {
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
-            $(VALUE_NODE_ID).innerHTML = '計測中...';
+            var startTime = this._model.getStartTime(taskId);
+            var delta = Date.now - startTime;
+            $(VALUE_NODE_ID).innerHTML = '計測中...(' + this.formatDuration(delta) + '経過)';
         } else {
+            $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
             for (var i = 0; i < length; i++) {
                 if (!this._model.isRecording(ids[i])) {
                     duration += this._model.getActualDuration(ids[i]);
@@ -222,9 +228,11 @@
 
     mgm.DetailsActualDurationView.prototype.formatDuration = function(duration) {
         if (duration === 0) return 'なし';
-        var hour = duration / 1000 / 60 / 60;
-        var minutes = (hour - Math.floor(hour)) * 60;
-        return Math.floor(hour) + ' 時間 ' +  Math.floor(minutes) + ' 分';
+        var hour = duration / 1000 / 60 / 60,
+            fHour = Math.floor(hour),
+            minutes = (hour - fHour) * 60,
+            fMinutes = Math.floor(minutes);
+        return (fHour > 0 ? fHour + '時間' : '') + (fMinutes > 0 ? fMinutes + '分' : '');
     };
 
 }(this, mgm));
