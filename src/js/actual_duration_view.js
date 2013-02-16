@@ -32,6 +32,8 @@
     var ACTION_NODE_ID = 'detailsactualduration_action';
     var ACTION_ICON_NODE_ID = 'detailsactualduration_action_icon';
 
+    var UPDATE_INTERVAL = 1000 * 10;
+
     var ICON_START = // {{{
             'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAf' +
             'SC3RAAAABGdBTUEAAK/INwWK6QAAAAlwSFlzAAAO' +
@@ -80,9 +82,12 @@
 
     mgm.DetailsActualDurationView = function(model) {
         this._model = model;
+        this._hoveredTaskId = null;
+        this._selectedTaskIds = [];
         this._createElements();
         this._installEventListeners();
         this._subscribeBroadcastEvent();
+        this._startUpdateTimer();
     };
 
     mgm.DetailsActualDurationView.prototype._createElements = function() {
@@ -148,6 +153,16 @@
         statusBox.setText('タスク "' + name + '" を終了しました', false, true);
     };
 
+    mgm.DetailsActualDurationView.prototype._startUpdateTimer = function() {
+        global.setInterval(function() {
+            if (this._hoveredTaskId) {
+                taskListHover.call(this, taskList.getViewList(), this._hoveredTaskId);
+            } else if (this._selectedTaskIds.length > 0) {
+                this._showSelectedTaskDuration(taskList.getViewList());
+            }
+        }.bind(this), UPDATE_INTERVAL);
+    };
+
     mgm.DetailsActualDurationView.prototype._subscribeBroadcastEvent = function() {
         messageBus.subscribe(this._onActiveTaskListHover.bind(this), 'rtm.list.tasks.hoverOn');
         messageBus.subscribe(this._onActiveTaskListBlur.bind(this), 'rtm.list.tasks.hoverOff');
@@ -175,11 +190,13 @@
 
     function taskListHover(list, taskId) {
         if (this._model.isRecording(taskId)) {
+            this._hoveredTaskId = taskId;
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
             var startTime = this._model.getStartTime(taskId);
             var delta = Date.now() - startTime;
             $(VALUE_NODE_ID).innerHTML = '計測中...(' + this.formatDuration(delta) + '経過)';
         } else {
+            this._hoveredTaskId = null;
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
             var duration = this._model.getActualDuration(taskId);
             $(VALUE_NODE_ID).innerHTML = this.formatDuration(duration);
@@ -211,11 +228,13 @@
             length = ids.length,
             duration = 0;
         if (length == 1 && this._model.isRecording(ids[0])) {
+            this._selectedTaskIds = ids.slice();
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
             var startTime = this._model.getStartTime(ids[0]);
             var delta = Date.now() - startTime;
             $(VALUE_NODE_ID).innerHTML = '計測中...(' + this.formatDuration(delta) + '経過)';
         } else {
+            this._selectedTaskIds.length = 0;
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
             for (var i = 0; i < length; i++) {
                 if (!this._model.isRecording(ids[i])) {
