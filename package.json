@@ -1,0 +1,10 @@
+{
+    "name": "a_measuring_glass_of_milk",
+    "version": "0.0.1",
+    "author": "dayilyfield",
+    "private": true,
+    "dependencies": {
+        "grunt-crx": "0.1.2",
+        "grunt-contrib": "0.3.0"
+  }
+}
