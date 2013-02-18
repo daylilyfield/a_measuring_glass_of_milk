@@ -1,3 +1,5 @@
+@charset 'utf-8';
+
 /* --------------------------------------------------------------------------- 
  Copyright (c) 2012, DAYLILYFIELD {{{
 
@@ -22,12 +24,22 @@
  DEALINGS IN THE SOFTWARE. }}}
  --------------------------------------------------------------------------- */
 
-@charset 'utf-8';
-
-#detailsactualduration_highlight {
+.mgm_listviewitem_active {
     cursor: pointer;
 }
 
-#detailsactualduration_highlight:hover {
+.mgm_listviewitem_active:hover {
     background-color: rgb(255, 255, 204);
+}
+
+.mgm_listviewitem_active .field_img {
+    display: inline;
+}
+
+.mgm_listviewitem_complete {
+    cursor: text;
+}
+
+.mgm_listviewitem_complete .field_img {
+    display: none;
 }

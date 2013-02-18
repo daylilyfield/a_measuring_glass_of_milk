@@ -32,7 +32,14 @@
     var ACTION_NODE_ID = 'detailsactualduration_action';
     var ACTION_ICON_NODE_ID = 'detailsactualduration_action_icon';
 
+    var STYLE_CLASS_ACTIVIE = 'mgm_listviewitem_active';
+    var STYLE_CLASS_COMPLETE = 'mgm_listviewitem_complete';
+
     var UPDATE_INTERVAL = 1000 * 10;
+
+    var TITLE = '時間を計測する (m)';
+    var LABEL = '計測時間';
+    var NONE = 'なし';
 
     var ICON_START = // {{{
             'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAf' +
@@ -91,9 +98,9 @@
     };
 
     mgm.DetailsActualDurationView.prototype._createElements = function() {
-        var title = '時間を計測する (m)',
-            label = '計測時間',
-            none = 'なし',
+        var title = TITLE,
+            label = LABEL,
+            none = NONE,
             container = document.createElement('div');
 
         container.id = CONTAINER_NODE_ID;
@@ -124,14 +131,16 @@
     };
 
     mgm.DetailsActualDurationView.prototype._onContainerNodeClicked = function(event) {
-        var taskIds = taskList.getViewList().getSelected(),
-            length = taskIds.length;
-        for (var i = 0; i < length; i++) {
-            var taskId = taskIds[i];
-            if (this._model.isRecording(taskId)) {
-                this._stopRecording(taskId);
-            } else {
-                this._startRecording(taskId);
+        if (taskList.getViewList().id == 'tasks') {
+            var taskIds = taskList.getViewList().getSelected(),
+                length = taskIds.length;
+            for (var i = 0; i < length; i++) {
+                var taskId = taskIds[i];
+                if (this._model.isRecording(taskId)) {
+                    this._stopRecording(taskId);
+                } else {
+                    this._startRecording(taskId);
+                }
             }
         }
         event.preventDefault();
@@ -174,16 +183,18 @@
 
     function onActive(f) {
         return function() {
-            $(ACTION_ICON_NODE_ID).style.display = 'inline';
-            $(ACTION_NODE_ID).title = '';
+            var hn = $(HIGHLIGHT_NODE_ID);
+            hn.title = TITLE;
+            hn.className = STYLE_CLASS_ACTIVIE;
             f.apply(this, arguments);
         };
     }
 
     function onComplete(f) {
         return function() {
-            $(ACTION_ICON_NODE_ID).style.display = 'none';
-            $(ACTION_NODE_ID).title = '';
+            var hn = $(HIGHLIGHT_NODE_ID);
+            hn.title = '';
+            hn.className = STYLE_CLASS_COMPLETE;
             f.apply(this, arguments);
         };
     }
