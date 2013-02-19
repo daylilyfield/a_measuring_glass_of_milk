@@ -50,44 +50,52 @@
 
     mgm.DetailsActualDurationModel.prototype.getStartTime = function(taskId) {
         if (this.isRecording(taskId)) {
-            return this._tasksActualDurations[taskId].slice(-1)[0].from.getTime();
+            var seriesId = this._findSeriesId(taskId);
+            return this._tasksActualDurations[seriesId].slice(-1)[0].from.getTime();
         } else {
             throw new Error('task is not started');
         }
     };
 
-    mgm.DetailsActualDurationModel.prototype.refresh = function(taskId) {
-        delete this._tasksActualDurations[taskId];
-        this._readMgmNoteIfNeeded(taskId);
+    mgm.DetailsActualDurationModel.prototype.refresh = function(noteId) {
+        var note = stateMgr.notes[noteId];
+        if (note) {
+            delete this._tasksActualDurations[note.task_series_id];
+            this._readMgmNoteIfNeeded(taskId);
+        }
     };
 
     mgm.DetailsActualDurationModel.prototype._readMgmNoteIfNeeded = function(taskId) {
-        if (taskId in this._tasksActualDurations) {
-            return this._tasksActualDurations[taskId];
+        var seriesId = this._findSeriesId(taskId);
+        if (seriesId in this._tasksActualDurations) {
+            return this._tasksActualDurations[seriesId];
         }
-        var notes = this._getNotesByTaskId(taskId);
+        var notes = this._getNotesBySeriesId(seriesId);
         if (notes && notes.length > 0) {
             var note = this._findMgmNote(notes);
             if (!note) {
-                return this._tasksActualDurations[taskId] = [];
+                return this._tasksActualDurations[seriesId] = [];
             } else {
                 var content = this._readMgmNoteContent(note.content);
-                return this._tasksActualDurations[taskId] = content;
+                return this._tasksActualDurations[seriesId] = content;
             }
         } else {
-            return this._tasksActualDurations[taskId] = [];
+            return this._tasksActualDurations[seriesId] = [];
         }
     };
 
-    mgm.DetailsActualDurationModel.prototype._getNotesByTaskId = function(taskId) {
-        if (!noteMgr.index) {
-            noteMgr.prepareIndex();
-        }
-        var seriesId = stateMgr.tasks[taskId].series_id;
+    mgm.DetailsActualDurationModel.prototype._getNotesBySeriesId = function(seriesId) {
         var noteIds = noteMgr.index[seriesId];
         return !noteIds ? [] : noteIds.map(function(value) {
             return stateMgr.notes[value];
         });
+    };
+
+    mgm.DetailsActualDurationModel.prototype._findSeriesId = function(taskId) {
+        if (!noteMgr.index) {
+            noteMgr.prepareIndex();
+        }
+        return stateMgr.tasks[taskId].series_id;
     };
 
     mgm.DetailsActualDurationModel.prototype._findMgmNote = function(notes) {
@@ -124,18 +132,20 @@
     mgm.DetailsActualDurationModel.prototype.startRecording = function(taskId) {
         if (!this.isRecording(taskId)) {
             var now = new Date(),
-                notes = this._getNotesByTaskId(taskId),
+                seriesId = this._findSeriesId(taskId),
+                notes = this._getNotesBySeriesId(taskId),
                 mgmNote = this._findMgmNote(notes),
                 content = (mgmNote ? mgmNote.content + '\n' : '') + now.toISOString() + ',';
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);
-            this._tasksActualDurations[taskId] = this._readMgmNoteContent(content);
+            this._tasksActualDurations[seriesId] = this._readMgmNoteContent(content);
         }
     };
 
     mgm.DetailsActualDurationModel.prototype.stopRecording = function(taskId) {
         if (this.isRecording(taskId)) {
             var now = new Date(),
-                notes = this._getNotesByTaskId(taskId),
+                seriesId = this._findSeriesId(taskId),
+                notes = this._getNotesBySeriesId(seriesId),
                 mgmNote = this._findMgmNote(notes),
                 content = mgmNote.content + now.toISOString(),
                 recent = content.split('\n').pop(),
@@ -149,7 +159,7 @@
                 content = length == 1 ? '' : lines.slice(0, length - 1).join('\n');
             }
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);
-            this._tasksActualDurations[taskId] = this._readMgmNoteContent(content);
+            this._tasksActualDurations[seriesId] = this._readMgmNoteContent(content);
             return this.getActualDuration(taskId);
         }
     };

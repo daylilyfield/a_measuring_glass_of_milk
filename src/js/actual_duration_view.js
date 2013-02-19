@@ -187,7 +187,7 @@
         messageBus.subscribe(this._onCompleteTaskListHover.bind(this), 'rtm.list.taskscompleted.hoverOn');
         messageBus.subscribe(this._onCompleteTaskListBlur.bind(this), 'rtm.list.taskscompleted.hoverOff');
         messageBus.subscribe(this._onCompleteListSelectionFinished.bind(this), 'rtm.list.taskscompleted.selectFinished');
-        messageBus.subscribe(this._onNoteAddSuccess.bind(this), 'rtm.notemanager.noteAddSuccess');
+        //messageBus.subscribe(this._onNoteAddSuccess.bind(this), 'rtm.notemanager.noteAddSuccess');
     };
 
     function onActive(f) {
@@ -266,12 +266,6 @@
                 }
             }
             $(VALUE_NODE_ID).innerHTML = this.formatDuration(duration);
-        }
-    };
-
-    mgm.DetailsActualDurationView.prototype._onNoteAddSuccess = function(manager, id) {
-        if (id[0]) {
-            this._model.refresh(id[0]);
         }
     };
 
