@@ -1,9 +1,15 @@
 module.exports = function(grunt) {
 
-    grunt.loadNpmTasks('grunt-crx');
-    
     grunt.initConfig({
     
+        copy: {
+            lib: {
+                files: {
+                    "src/js/mustache.js": "node_modules/mustache/mustache.js"
+                }
+            }
+        },
+
         crx: {
             build: {
                 src: 'src/',
@@ -15,5 +21,8 @@ module.exports = function(grunt) {
     
     });
 
-    grunt.registerTask('default', 'crx:build');
+    grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-crx');
+    
+    grunt.registerTask('default', 'copy crx');
 };

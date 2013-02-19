@@ -32,14 +32,20 @@
     var ACTION_NODE_ID = 'detailsactualduration_action';
     var ACTION_ICON_NODE_ID = 'detailsactualduration_action_icon';
 
-    var STYLE_CLASS_ACTIVIE = 'mgm_listviewitem_active';
+    var STYLE_CLASS_ACTIVE = 'mgm_listviewitem_active';
     var STYLE_CLASS_COMPLETE = 'mgm_listviewitem_complete';
 
     var UPDATE_INTERVAL = 1000 * 10;
 
     var TITLE = '時間を計測する (m)';
     var LABEL = '計測時間';
+    var HOUR = '時間';
+    var MIN = '分';
     var NONE = 'なし';
+
+    var TEMPLATE_START_TASK = 'タスク "{{name}}" を開始しました';
+    var TEMPLATE_STOP_TASK = 'タスク "{{name}}" を終了しました';
+    var TEMPLATE_RECORDING = '計測中...({{duration}}経過)';
 
     var ICON_START = // {{{
             'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAf' +
@@ -148,18 +154,20 @@
 
     mgm.DetailsActualDurationView.prototype._startRecording = function(taskId) {
         $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
-        $(VALUE_NODE_ID).innerHTML = '計測中...(0分経過)';
+        $(VALUE_NODE_ID).innerHTML = Mustache.render(TEMPLATE_RECORDING, {duration: 0 + MIN});
         this._model.startRecording(taskId);
-        var name = stateMgr.tasks[taskId].name;
-        statusBox.setText('タスク "' + name + '" を開始しました', false, true);
+        var name = stateMgr.tasks[taskId].name,
+            message = Mustache.render(TEMPLATE_START_TASK, {name: name});
+        statusBox.setText(message, false, true);
     };
 
     mgm.DetailsActualDurationView.prototype._stopRecording = function(taskId) {
         $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
         var duration = this._model.stopRecording(taskId);
         $(VALUE_NODE_ID).innerHTML = this.formatDuration(duration);
-        var name = stateMgr.tasks[taskId].name;
-        statusBox.setText('タスク "' + name + '" を終了しました', false, true);
+        var name = stateMgr.tasks[taskId].name,
+            message = Mustache.render(TEMPLATE_STOP_TASK, {name: name});
+        statusBox.setText(message, false, true);
     };
 
     mgm.DetailsActualDurationView.prototype._startUpdateTimer = function() {
@@ -179,13 +187,14 @@
         messageBus.subscribe(this._onCompleteTaskListHover.bind(this), 'rtm.list.taskscompleted.hoverOn');
         messageBus.subscribe(this._onCompleteTaskListBlur.bind(this), 'rtm.list.taskscompleted.hoverOff');
         messageBus.subscribe(this._onCompleteListSelectionFinished.bind(this), 'rtm.list.taskscompleted.selectFinished');
+        messageBus.subscribe(this._onNoteAddSuccess.bind(this), 'rtm.notemanager.noteAddSuccess');
     };
 
     function onActive(f) {
         return function() {
             var hn = $(HIGHLIGHT_NODE_ID);
             hn.title = TITLE;
-            hn.className = STYLE_CLASS_ACTIVIE;
+            hn.className = STYLE_CLASS_ACTIVE;
             f.apply(this, arguments);
         };
     }
@@ -205,7 +214,9 @@
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
             var startTime = this._model.getStartTime(taskId);
             var delta = Date.now() - startTime;
-            $(VALUE_NODE_ID).innerHTML = '計測中...(' + this.formatDuration(delta) + '経過)';
+            $(VALUE_NODE_ID).innerHTML = Mustache.render(TEMPLATE_RECORDING, {
+                duration: this.formatDuration(delta)
+            });
         } else {
             this._hoveredTaskId = null;
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
@@ -243,7 +254,9 @@
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
             var startTime = this._model.getStartTime(ids[0]);
             var delta = Date.now() - startTime;
-            $(VALUE_NODE_ID).innerHTML = '計測中...(' + this.formatDuration(delta) + '経過)';
+            $(VALUE_NODE_ID).innerHTML = Mustache.render(TEMPLATE_RECORDING, {
+                duration: this.formatDuration(delta)
+            });
         } else {
             this._selectedTaskIds.length = 0;
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
@@ -256,13 +269,19 @@
         }
     };
 
+    mgm.DetailsActualDurationView.prototype._onNoteAddSuccess = function(manager, id) {
+        if (id[0]) {
+            this._model.refresh(id[0]);
+        }
+    };
+
     mgm.DetailsActualDurationView.prototype.formatDuration = function(duration) {
-        if (duration === 0) return 'なし';
+        if (duration === 0) return NONE;
         var hour = duration / 1000 / 60 / 60,
             fHour = Math.floor(hour),
             minutes = (hour - fHour) * 60,
             fMinutes = Math.floor(minutes);
-        return (fHour > 0 ? fHour + '時間' : '') + fMinutes + '分';
+        return (fHour > 0 ? fHour + HOUR : '') + fMinutes + MIN;
     };
 
 }(this, mgm));

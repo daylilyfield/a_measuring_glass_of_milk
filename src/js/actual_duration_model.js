@@ -56,6 +56,11 @@
         }
     };
 
+    mgm.DetailsActualDurationModel.prototype.refresh = function(taskId) {
+        delete this._tasksActualDurations[taskId];
+        this._readMgmNoteIfNeeded(taskId);
+    };
+
     mgm.DetailsActualDurationModel.prototype._readMgmNoteIfNeeded = function(taskId) {
         if (taskId in this._tasksActualDurations) {
             return this._tasksActualDurations[taskId];

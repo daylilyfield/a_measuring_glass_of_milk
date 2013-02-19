@@ -17,6 +17,7 @@
     ],
 
     "web_accessible_resources": [
+        "js/mustache.js",
         "js/mgm.js",
         "js/namespace.js",
         "js/actual_duration_model.js",

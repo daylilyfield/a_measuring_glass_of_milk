@@ -37,6 +37,7 @@
     });
     document.body.appendChild(root);
 }([
+    'js/mustache.js',
     'js/namespace.js',
     'js/actual_duration_model.js',
     'js/actual_duration_view.js',
