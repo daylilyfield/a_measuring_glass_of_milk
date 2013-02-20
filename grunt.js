@@ -6,7 +6,7 @@ module.exports = function(grunt) {
             target: {
                 files: {
                     "target/js/mustache.js": "src/js/component/mustache/mustache.js",
-                    "target/js/": "/src/js/*",
+                    "target/js/": "src/js/*",
                     "target/manifest.json": "src/manifest.json"
                 }
             }
