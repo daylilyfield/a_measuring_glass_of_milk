@@ -20,6 +20,7 @@
         "js/component/mustache/mustache.js",
         "js/mgm.js",
         "js/namespace.js",
+        "js/i18n.js",
         "js/actual_duration_model.js",
         "js/actual_duration_view.js",
         "image/control_play.png",

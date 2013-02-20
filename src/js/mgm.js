@@ -25,10 +25,11 @@
 (function(global, mgm, initialize) {
 
     if (!messageBus || !stateMgr || !noteMgr) {
-        setTimeout(arguments.callee.bind(global, global, mgm, initialize), 1000);
+        setTimeout(arguments.callee.bind(global, global, mgm, initialize), 500);
     } else {
         initialize(mgm);
     }
+
 }(this, mgm, function(mgm) {
     
     noteMgr.completeNewNote = function(noteId, hash) {

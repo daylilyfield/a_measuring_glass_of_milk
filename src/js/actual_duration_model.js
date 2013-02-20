@@ -133,7 +133,7 @@
         if (!this.isRecording(taskId)) {
             var now = new Date(),
                 seriesId = this._findSeriesId(taskId),
-                notes = this._getNotesBySeriesId(taskId),
+                notes = this._getNotesBySeriesId(seriesId),
                 mgmNote = this._findMgmNote(notes),
                 content = (mgmNote ? mgmNote.content + '\n' : '') + now.toISOString() + ',';
             this._updateMgmNote(taskId, content, mgmNote && mgmNote.id);

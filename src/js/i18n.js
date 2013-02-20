@@ -22,25 +22,42 @@
 // DEALINGS IN THE SOFTWARE. }}}
 // --------------------------------------------------------------------------- 
 
-(function(links) {
-    var root = links.reverse().map(function(value) {
-        var link = chrome.extension.getURL(value);
-        var script = document.createElement("script");
-        script.type = "text/javascript";
-        script.src = link;
-        return script;
-    }).reduce(function(previous, current) {
-        current.onload = function() {
-            document.body.appendChild(previous);
-        };
-        return current;
-    });
-    document.body.appendChild(root);
-}([
-    'js/component/mustache/mustache.js',
-    'js/namespace.js',
-    'js/actual_duration_model.js',
-    'js/actual_duration_view.js',
-    'js/i18n.js',
-    'js/mgm.js'
-]));
+(function(global, mgm, initialize) {
+
+    if (!configurationMgr) {
+        global.setTimeout(arguments.callee.bind(global, global, mgm, initialize), 500);
+    } else {
+        initialize(mgm);
+    }
+
+}(this, mgm, function(mgm) {
+
+    var lang = {};
+
+    lang.ja = {
+        TITLE: '時間を計測する (m)',
+        LABEL: '計測時間',
+        HOUR: '時間',
+        MIN: '分',
+        NONE: 'なし',
+        TEMPLATE_START_TASK: 'タスク "{{name}}" を開始しました',
+        TEMPLATE_STOP_TASK: 'タスク "{{name}}" を終了しました',
+        TEMPLATE_RECORDING: '計測中... ({{duration}}経過)'
+    };
+
+    lang.en_US = {
+        TITLE: 'Record Time Duration (m)',
+        LABEL: 'Time recorded',
+        HOUR: 'h ',
+        MIN: 'min',
+        NONE: 'none',
+        TEMPLATE_START_TASK: 'Task "{{name}}" has started.',
+        TEMPLATE_STOP_TASK: 'Task "{{name}}" has stoped.',
+        TEMPLATE_RECORDING: 'Rec... ({{duration}})'
+    };
+
+    var selected = configurationMgr.language.selectedOptions[0].getAttribute('value');
+
+    mgm.i18n = lang[selected] || lang.en_US;
+
+}));

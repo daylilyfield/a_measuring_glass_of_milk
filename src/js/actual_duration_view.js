@@ -37,16 +37,6 @@
 
     var UPDATE_INTERVAL = 1000 * 10;
 
-    var TITLE = '時間を計測する (m)';
-    var LABEL = '計測時間';
-    var HOUR = '時間';
-    var MIN = '分';
-    var NONE = 'なし';
-
-    var TEMPLATE_START_TASK = 'タスク "{{name}}" を開始しました';
-    var TEMPLATE_STOP_TASK = 'タスク "{{name}}" を終了しました';
-    var TEMPLATE_RECORDING = '計測中...({{duration}}経過)';
-
     var ICON_START = // {{{
             'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAf' +
             'SC3RAAAABGdBTUEAAK/INwWK6QAAAAlwSFlzAAAO' +
@@ -104,9 +94,9 @@
     };
 
     mgm.DetailsActualDurationView.prototype._createElements = function() {
-        var title = TITLE,
-            label = LABEL,
-            none = NONE,
+        var title = mgm.i18n.TITLE,
+            label = mgm.i18n.LABEL,
+            none = mgm.i18n.NONE,
             container = document.createElement('div');
 
         container.id = CONTAINER_NODE_ID;
@@ -154,10 +144,10 @@
 
     mgm.DetailsActualDurationView.prototype._startRecording = function(taskId) {
         $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
-        $(VALUE_NODE_ID).innerHTML = Mustache.render(TEMPLATE_RECORDING, {duration: 0 + MIN});
+        $(VALUE_NODE_ID).innerHTML = Mustache.render(mgm.i18n.TEMPLATE_RECORDING, {duration: 0 + mgm.i18n.MIN});
         this._model.startRecording(taskId);
         var name = stateMgr.tasks[taskId].name,
-            message = Mustache.render(TEMPLATE_START_TASK, {name: name});
+            message = Mustache.render(mgm.i18n.TEMPLATE_START_TASK, {name: name});
         statusBox.setText(message, false, true);
     };
 
@@ -166,7 +156,7 @@
         var duration = this._model.stopRecording(taskId);
         $(VALUE_NODE_ID).innerHTML = this.formatDuration(duration);
         var name = stateMgr.tasks[taskId].name,
-            message = Mustache.render(TEMPLATE_STOP_TASK, {name: name});
+            message = Mustache.render(mgm.i18n.TEMPLATE_STOP_TASK, {name: name});
         statusBox.setText(message, false, true);
     };
 
@@ -193,7 +183,7 @@
     function onActive(f) {
         return function() {
             var hn = $(HIGHLIGHT_NODE_ID);
-            hn.title = TITLE;
+            hn.title = mgm.i18n.TITLE;
             hn.className = STYLE_CLASS_ACTIVE;
             f.apply(this, arguments);
         };
@@ -214,7 +204,7 @@
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
             var startTime = this._model.getStartTime(taskId);
             var delta = Date.now() - startTime;
-            $(VALUE_NODE_ID).innerHTML = Mustache.render(TEMPLATE_RECORDING, {
+            $(VALUE_NODE_ID).innerHTML = Mustache.render(mgm.i18n.TEMPLATE_RECORDING, {
                 duration: this.formatDuration(delta)
             });
         } else {
@@ -254,7 +244,7 @@
             $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
             var startTime = this._model.getStartTime(ids[0]);
             var delta = Date.now() - startTime;
-            $(VALUE_NODE_ID).innerHTML = Mustache.render(TEMPLATE_RECORDING, {
+            $(VALUE_NODE_ID).innerHTML = Mustache.render(mgm.i18n.TEMPLATE_RECORDING, {
                 duration: this.formatDuration(delta)
             });
         } else {
@@ -270,12 +260,12 @@
     };
 
     mgm.DetailsActualDurationView.prototype.formatDuration = function(duration) {
-        if (duration === 0) return NONE;
+        if (duration === 0) return mgm.i18n.NONE;
         var hour = duration / 1000 / 60 / 60,
             fHour = Math.floor(hour),
             minutes = (hour - fHour) * 60,
             fMinutes = Math.floor(minutes);
-        return (fHour > 0 ? fHour + HOUR : '') + fMinutes + MIN;
+        return (fHour > 0 ? fHour + mgm.i18n.HOUR : '') + fMinutes + mgm.i18n.MIN;
     };
 
 }(this, mgm));
