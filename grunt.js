@@ -3,16 +3,18 @@ module.exports = function(grunt) {
     grunt.initConfig({
     
         copy: {
-            lib: {
+            target: {
                 files: {
-                    "src/js/mustache.js": "node_modules/mustache/mustache.js"
+                    "target/js/mustache.js": "src/js/component/mustache/mustache.js",
+                    "target/js/": "/src/js/*",
+                    "target/manifest.json": "src/manifest.json"
                 }
             }
         },
 
         crx: {
             build: {
-                src: 'src/',
+                src: 'target/',
                 dest: 'dest/',
                 privateKey: 'mgm.pem',
                 filename: 'mgm.crx'

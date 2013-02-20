@@ -1,0 +1,7 @@
+{
+    "name": "a_measuring_glass_of_milk",
+    "version": "0.0.1",
+    "dependencies": {
+        "mustache": "0.7.2"
+    }
+}

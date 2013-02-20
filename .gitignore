@@ -3,4 +3,4 @@ node_modules
 mgm.pem
 dest
 target
-src/js/mustache.js
+src/js/component
