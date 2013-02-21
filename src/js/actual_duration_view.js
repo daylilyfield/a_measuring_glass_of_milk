@@ -124,6 +124,13 @@
 
     mgm.DetailsActualDurationView.prototype._installEventListeners = function() {
         $(CONTAINER_NODE_ID).addEventListener('click', this._onContainerNodeClicked.bind(this));
+        document.addEventListener('keypress', this._onKeyPressed.bind(this));
+    };
+
+    mgm.DetailsActualDurationView.prototype._onKeyPressed = function(event) {
+        if (event.keyCode === 109 /* press m */) {
+            this._onContainerNodeClicked(event);
+        }
     };
 
     mgm.DetailsActualDurationView.prototype._onContainerNodeClicked = function(event) {

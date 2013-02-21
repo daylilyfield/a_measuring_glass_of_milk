@@ -24,7 +24,7 @@
 
 (function(global, mgm, initialize) {
 
-    if (!messageBus || !stateMgr || !noteMgr) {
+    if (!messageBus || !stateMgr || !noteMgr || !configurationMgr) {
         setTimeout(arguments.callee.bind(global, global, mgm, initialize), 500);
     } else {
         initialize(mgm);
@@ -38,6 +38,9 @@
             NoteManager.prototype.completeNewNote.apply(noteMgr, arguments);
         }
     };
+
+    var selected = configurationMgr.language.selectedOptions[0].getAttribute('value');
+    mgm.i18n.load(selected);
 
     var model = new mgm.DetailsActualDurationModel();
     var view = new mgm.DetailsActualDurationView(model);

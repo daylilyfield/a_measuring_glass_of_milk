@@ -22,42 +22,43 @@
 // DEALINGS IN THE SOFTWARE. }}}
 // --------------------------------------------------------------------------- 
 
-(function(global, mgm, initialize) {
+(function(mgm) {
 
-    if (!configurationMgr) {
-        global.setTimeout(arguments.callee.bind(global, global, mgm, initialize), 500);
-    } else {
-        initialize(mgm);
-    }
+    mgm.i18n = (function() {
+    
+        var lang = {};
 
-}(this, mgm, function(mgm) {
+        lang.ja = {
+            TITLE: '時間を計測する (m)',
+            LABEL: '計測時間',
+            HOUR: '時間',
+            MIN: '分',
+            NONE: 'なし',
+            TEMPLATE_START_TASK: 'タスク "{{name}}" を開始しました',
+            TEMPLATE_STOP_TASK: 'タスク "{{name}}" を終了しました',
+            TEMPLATE_RECORDING: '計測中... ({{duration}}経過)'
+        };
 
-    var lang = {};
+        lang.en_US = {
+            TITLE: 'Record Time Duration (m)',
+            LABEL: 'Time recorded',
+            HOUR: 'h ',
+            MIN: 'min',
+            NONE: 'none',
+            TEMPLATE_START_TASK: 'Task "{{name}}" has started.',
+            TEMPLATE_STOP_TASK: 'Task "{{name}}" has stoped.',
+            TEMPLATE_RECORDING: 'Rec... ({{duration}})'
+        };
 
-    lang.ja = {
-        TITLE: '時間を計測する (m)',
-        LABEL: '計測時間',
-        HOUR: '時間',
-        MIN: '分',
-        NONE: 'なし',
-        TEMPLATE_START_TASK: 'タスク "{{name}}" を開始しました',
-        TEMPLATE_STOP_TASK: 'タスク "{{name}}" を終了しました',
-        TEMPLATE_RECORDING: '計測中... ({{duration}}経過)'
-    };
+        function load(language) {
+            var message = lang[language] || lang.en_US;
+            for (var key in message) {
+                mgm.i18n[key] = message[key];
+            }
+        }
 
-    lang.en_US = {
-        TITLE: 'Record Time Duration (m)',
-        LABEL: 'Time recorded',
-        HOUR: 'h ',
-        MIN: 'min',
-        NONE: 'none',
-        TEMPLATE_START_TASK: 'Task "{{name}}" has started.',
-        TEMPLATE_STOP_TASK: 'Task "{{name}}" has stoped.',
-        TEMPLATE_RECORDING: 'Rec... ({{duration}})'
-    };
+        return {load: load};
+    
+    }());
 
-    var selected = configurationMgr.language.selectedOptions[0].getAttribute('value');
-
-    mgm.i18n = lang[selected] || lang.en_US;
-
-}));
+}(mgm));
