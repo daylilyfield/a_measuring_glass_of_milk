@@ -128,12 +128,14 @@
     };
 
     mgm.DetailsActualDurationView.prototype._onKeyPressed = function(event) {
-        if (event.keyCode === 109 /* press m */) {
-            this._onContainerNodeClicked(event);
+        var pressed = event.keyCode === 109,
+            tag = document.activeElement.tagName.toUpperCase();
+        if (pressed && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+            this._toggleTaskRecordingState();
         }
     };
 
-    mgm.DetailsActualDurationView.prototype._onContainerNodeClicked = function(event) {
+    mgm.DetailsActualDurationView.prototype._toggleTaskRecordingState = function() {
         if (taskList.getViewList().id == 'tasks') {
             var taskIds = taskList.getViewList().getSelected(),
                 length = taskIds.length;
@@ -146,6 +148,10 @@
                 }
             }
         }
+    };
+
+    mgm.DetailsActualDurationView.prototype._onContainerNodeClicked = function(event) {
+        this._toggleTaskRecordingState();
         event.preventDefault();
     };
 
