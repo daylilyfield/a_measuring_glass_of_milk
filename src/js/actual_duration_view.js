@@ -83,8 +83,10 @@
             'SUVORK5CYII=';
     // }}}
 
-    mgm.DetailsActualDurationView = function(model) {
+    mgm.DetailsActualDurationView = function(model, messageBus, stateMgr) {
         this._model = model;
+        this._messageBus = messageBus;
+        this._stateMgr = stateMgr;
         this._hoveredTaskId = null;
         this._selectedTaskIds = [];
         this._createElements();
@@ -159,7 +161,7 @@
         $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_STOP;
         $(VALUE_NODE_ID).innerHTML = Mustache.render(mgm.i18n.TEMPLATE_RECORDING, {duration: 0 + mgm.i18n.MIN});
         this._model.startRecording(taskId);
-        var name = stateMgr.tasks[taskId].name,
+        var name = this._stateMgr.tasks[taskId].name,
             message = Mustache.render(mgm.i18n.TEMPLATE_START_TASK, {name: name});
         statusBox.setText(message, false, true);
     };
@@ -168,7 +170,7 @@
         $(ACTION_ICON_NODE_ID).src = 'data:image/png;base64,' + ICON_START;
         var duration = this._model.stopRecording(taskId);
         $(VALUE_NODE_ID).innerHTML = this.formatDuration(duration);
-        var name = stateMgr.tasks[taskId].name,
+        var name = this._stateMgr.tasks[taskId].name,
             message = Mustache.render(mgm.i18n.TEMPLATE_STOP_TASK, {name: name});
         statusBox.setText(message, false, true);
     };

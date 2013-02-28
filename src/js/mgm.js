@@ -24,7 +24,7 @@
 
 (function(global, mgm, initialize) {
 
-    if (!messageBus || !stateMgr || !noteMgr || !configurationMgr) {
+    if (!messageBus || !stateMgr || !noteMgr || !transMgr || !configurationMgr) {
         setTimeout(arguments.callee.bind(global, global, mgm, initialize), 500);
     } else {
         initialize(mgm);
@@ -42,6 +42,6 @@
     var selected = configurationMgr.language.selectedOptions[0].getAttribute('value');
     mgm.i18n.load(selected);
 
-    var model = new mgm.DetailsActualDurationModel();
-    var view = new mgm.DetailsActualDurationView(model);
+    var model = new mgm.DetailsActualDurationModel(noteMgr, stateMgr, transMgr);
+    var view = new mgm.DetailsActualDurationView(model, messageBus, stateMgr);
 }));

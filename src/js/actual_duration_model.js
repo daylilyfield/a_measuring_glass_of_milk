@@ -26,8 +26,11 @@
 
     var MGM_NOTE_TITLE = 'Measuring Glass';
 
-    mgm.DetailsActualDurationModel = function() {
+    mgm.DetailsActualDurationModel = function(noteMgr, stateMgr, transMgr) {
         this._tasksActualDurations = {}; // [{from: ..., to: ...}, {from: ..., to: ...}]
+        this._noteMgr = noteMgr;
+        this._stateMgr = stateMgr;
+        this._transMgr = transMgr;
     };
 
     mgm.DetailsActualDurationModel.prototype.isRecording = function(taskId) {
@@ -58,7 +61,7 @@
     };
 
     mgm.DetailsActualDurationModel.prototype.refresh = function(noteId) {
-        var note = stateMgr.notes[noteId];
+        var note = this._stateMgr.notes[noteId];
         if (note) {
             delete this._tasksActualDurations[note.task_series_id];
             this._readMgmNoteIfNeeded(taskId);
@@ -85,17 +88,17 @@
     };
 
     mgm.DetailsActualDurationModel.prototype._getNotesBySeriesId = function(seriesId) {
-        var noteIds = noteMgr.index[seriesId];
+        if (!this._noteMgr.index) {
+            this._noteMgr.prepareIndex();
+        }
+        var noteIds = this._noteMgr.index[seriesId];
         return !noteIds ? [] : noteIds.map(function(value) {
-            return stateMgr.notes[value];
-        });
+            return this._stateMgr.notes[value];
+        }.bind(this));
     };
 
     mgm.DetailsActualDurationModel.prototype._findSeriesId = function(taskId) {
-        if (!noteMgr.index) {
-            noteMgr.prepareIndex();
-        }
-        return stateMgr.tasks[taskId].series_id;
+        return this._stateMgr.tasks[taskId].series_id;
     };
 
     mgm.DetailsActualDurationModel.prototype._findMgmNote = function(notes) {
@@ -179,7 +182,7 @@
             var hash = hex_sha1(Math.random() * 10000 + content);
             parameter.hash = hash;
         }
-        transMgr.request(method, utility.encodeJavaScript(parameter));
+        this._transMgr.request(method, utility.encodeJavaScript(parameter));
     };
 
 }(mgm));
