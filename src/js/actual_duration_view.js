@@ -130,9 +130,9 @@
     };
 
     mgm.DetailsActualDurationView.prototype._onKeyPressed = function(event) {
-        var pressed = event.keyCode === 109,
-            tag = document.activeElement.tagName.toUpperCase();
-        if (pressed && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+        var pressed = event.keyCode === 101,
+            type = document.activeElement.type;
+        if (pressed &&  !/^(textarea|input|text|password|select|button|submit)/i.test(type)) {
             this._toggleTaskRecordingState();
         }
     };
