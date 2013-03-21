@@ -22,15 +22,15 @@
 // DEALINGS IN THE SOFTWARE. }}}
 // --------------------------------------------------------------------------- 
 
-(function(global, mgm, initialize) {
+(function(g, mgm, initialize) {
 
-    if (!messageBus || !stateMgr || !noteMgr || !transMgr || !configurationMgr) {
-        setTimeout(arguments.callee.bind(global, global, mgm, initialize), 500);
+    if (!g.messageBus || !g.stateMgr || !g.noteMgr || !g.transMgr || !g.configurationMgr) {
+        setTimeout(arguments.callee.bind(g, g, mgm, initialize), 500);
     } else {
-        initialize(mgm);
+        initialize(g, mgm);
     }
 
-}(this, mgm, function(mgm) {
+}(this, mgm, function(g, mgm) {
     
     noteMgr.completeNewNote = function(noteId, hash) {
         var exists = !!this.noteHashMap[hash] || !!this.noteMap[noteId];
@@ -39,9 +39,9 @@
         }
     };
 
-    var selected = configurationMgr.language.selectedOptions[0].getAttribute('value');
+    var selected = g.configurationMgr.language.selectedOptions[0].getAttribute('value');
     mgm.i18n.load(selected);
 
-    var model = new mgm.DetailsActualDurationModel(noteMgr, stateMgr, transMgr);
-    var view = new mgm.DetailsActualDurationView(model, messageBus, stateMgr);
+    var model = new mgm.DetailsActualDurationModel(g.noteMgr, g.stateMgr, g.transMgr);
+    var view = new mgm.DetailsActualDurationView(model, g.messageBus, g.stateMgr);
 }));
