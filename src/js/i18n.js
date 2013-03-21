@@ -29,7 +29,7 @@
         var lang = {};
 
         lang.ja = {
-            TITLE: '時間を計測する (m)',
+            TITLE: '時間を計測する (e)',
             LABEL: '計測時間',
             HOUR: '時間',
             MIN: '分',
@@ -40,7 +40,7 @@
         };
 
         lang.en_US = {
-            TITLE: 'Record Time Duration (m)',
+            TITLE: 'Record Time Duration (e)',
             LABEL: 'Time recorded',
             HOUR: 'h ',
             MIN: 'min',
