@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A Measuring Glass of Milk Test</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
+    <script>mocha.setup('bdd')</script>
+    <script>chai.should()</script>
+    <script src="../src/js/namespace.js"></script>
+    <script src="../src/js/actual_duration_model.js"></script>
+    <script src="actual_duration_model_test.js"></script>
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script>(window.mochaPhantomJS || mocha).run();</script>
+  </body>
+</html>
